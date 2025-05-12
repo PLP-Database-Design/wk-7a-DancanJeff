@@ -38,51 +38,57 @@ primary key(product , orderId)
 -- Question 2: Transform OrderDetails table into 2NF
 
 -- First, create the original OrderDetails table (1NF)
-CREATE TABLE OrderDetails (
-    OrderID INT,
-    CustomerName VARCHAR(255),
-    Product VARCHAR(255),
-    Quantity INT,
-    PRIMARY KEY (OrderID, Product)
-);
+create table OrderDetails (
+OrderID  int  ,
+CustomerName varchar(255) ,
+Product varchar(255) ,
+Quantity int );
 
--- Insert sample data
-INSERT INTO OrderDetails VALUES
-(101, 'John Doe', 'Laptop', 2),
-(101, 'John Doe', 'Mouse', 1),
-(102, 'Jane Smith', 'Tablet', 3),
-(102, 'Jane Smith', 'Keyboard', 1),
-(102, 'Jane Smith', 'Mouse', 2),
-(103, 'Emily Clark', 'Phone', 1);
+insert into OrderDetails values 
+(101, 'John Doe', 'laptop', 2),
+ (101, 'John Doe', 'Mouse', 1),
+ (102, 'Jane Smith', 'Tablet', 3),
+ (102, 'Jane Smith', 'Keyboard', 1),
+ (102, 'Jane Smith', 'Mouse',2),
+ (103, 'Emily Clark', 'Phone', 1);
+ 
+ select * from orderdetails
+ 
+ -- Create 2NF tables by separating the tables based on dependencies
 
--- Create 2NF tables by separating the tables based on dependencies
-
--- Table 1: Orders (Contains customer information)
-CREATE TABLE Orders (
-    OrderID INT PRIMARY KEY,
-    CustomerName VARCHAR(255) NOT NULL
-);
-
--- Table 2: OrderProducts (Contains product details for each order)
-CREATE TABLE OrderProducts (
-    OrderID INT,
-    Product VARCHAR(255),
-    Quantity INT NOT NULL,
-    PRIMARY KEY (OrderID, Product),
-    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
-);
-
+ create table Orders (
+ OrderId int primary key,
+ CustomerName varchar(255) not null );
+ 
 -- Insert data into the normalized tables
-INSERT INTO Orders
-SELECT DISTINCT OrderID, CustomerName
-FROM OrderDetails;
+ insert into Orders
+ select distinct OrderID, CustomerName 
+ from orderdetails;
+ 
+ select * from orders;
+ 
+ -- Table 2: OrderProducts (Contains product details for each order)
+ create table OrderProduct (
+ OrderID int ,
+ Product varchar(255),
+ Quantity int ,
+ primary key (OrderID, Product),
+foreign key (OrderID) references orders(OrderID)
+  );
+  
+-- Insert data into the normalized tables
+  insert into orderproduct
+  select OrderID,Product, quantity
+  from orderDetails;
+  
+  select * from orderproduct
+  
+  -- Query to view the normalized data
+  select CustomerName,Product, Quantity
+  from OrderProduct op
+  join  orders o
+  on op.orderid=o.orderid;
+  
 
-INSERT INTO OrderProducts
-SELECT OrderID, Product, Quantity
-FROM OrderDetails;
 
--- Query to view the normalized data
-SELECT o.OrderID, o.CustomerName, op.Product, op.Quantity
-FROM Orders o
-JOIN OrderProducts op ON o.OrderID = op.OrderID
-ORDER BY o.OrderID;
+
